@@ -1,3 +1,28 @@
+const DEFAULTS_XP = {
+	mode: 'xp'
+	, data: {
+		orange  : { value: 1, default: true }
+		, red   : { value: 15 }
+		, blue  : { value: 30 }
+		, green : { value: 60 }
+		, cyan  : { value: 120 }
+		, pink  : { value: 240 }
+	}
+};
+
+const DEFAULTS_HEROISM = {
+	mode: 'heroism'
+	, data: {
+		yellow  : { value: 1, default: true }
+		, red   : { value: 5 }
+		, blue  : { value: 10 }
+		, green : { value: 25 }
+		, brown : { value: 50 }
+		, pink  : { value: 100 }
+		, cyan  : { value: 200 }
+	}
+};
+
 function expected(types) {
 	// clone objects, and give the key as a label why not
 	types = Object.keys(types).map((k) => { return { name: k, chance: types[k].chance, value: types[k].value }; });
@@ -16,12 +41,83 @@ function expected(types) {
 }
 
 $(document).ready(() => {
+	$('#status').text('Setting up...')
+	load();
+});
+
+function getData() {
+	let data = $('#calc .row')
+		.toArray()
+		.map(row => Array.from(row.children)
+		.filter(elem => elem.nodeName === "INPUT"))
+		.map(row => row.reduce((obj, elem) => { obj[elem.name] = elem.value; return obj; }, {}))
+		// .map(row => { Object.keys(row).filter(key => ["name", "value"].indexOf(key) < 0).forEach(key => { delete row[key]; }); return row; })
+		.reduce((obj, row) => { obj[row.name] = row; delete row.name; return obj; }, {})
+	data[Object.keys(data)[0]].default = true;
+	return {
+		mode: $('#mode').val()
+		, data: data
+	};
+}
+
+function save() {
+	localStorage.setItem('heroism_calculator', JSON.stringify(getData()));
+	$('#status').text('Saved');
+}
+
+function drawForm(data) {
+	console.log('drawForm', data);
+	function drawRow(data, key) {
+		return `
+		<div class="row">
+			<label>Name: </label><input name="name" value="${key}" disabled />
+			<label>Chance:</label>
+			<input name="chance" value="${data[key].default ? "100%" : (data[key].chance || "0%")}"${data[key].default ? " disabled" : ""} />
+			<label>Chance upgrade cost:</label>
+			<input name="chance_cost" value="${data[key].chance_cost || "0"}"${data[key].default ? " disabled" : ""} />
+			<label>Value:</label>
+			<input name="value" value="${data[key].value}" />
+			<label>Value upgrade cost:</label>
+			<input name="value_cost" value="${data[key].value_cost || "0"}" />
+			<label>Value increment:</label>
+			<input name="value_increment" value="${data[key].value}" />
+		</div>`;
+	};
+	let html = '';
+	for (key in data.data) {
+		html += drawRow(data.data, key);
+	}
+	$('#calc').html(html);
+	$('#mode').val(data.mode);
+
 	$('#calc input').change((e) => {
 		calculate(e.target);
 	});
 	calculate();
-});
+}
 
+function load() {
+	let data = JSON.parse(localStorage.getItem('heroism_calculator')) || DEFAULTS_XP;
+	drawForm(data);
+
+	$('#status').text('Ready');
+};
+
+function mode() {
+	let data;
+	if ($('#mode').val() === 'xp') {
+		data = DEFAULTS_HEROISM;
+	}
+	else if ($('#mode').val() === 'heroism') {
+		data = DEFAULTS_XP;
+	}
+	if (data) {
+		drawForm(data);
+	}
+	else {
+		$('#status').text('Mode not recognized.');
+	}
+}
 
 const validate = {
 	percent: (str) => {
@@ -110,44 +206,18 @@ function calculate(target) {
 	if (target) validate.input(target);
 	else document.querySelectorAll('#calc input:not(:disabled)').forEach(validate.input);
 
-	/*let*/  curr_types = {
-		// orange: { chance:1, value:18 },
-		// red: { chance:0.63, value:3706 },
-		// blue: { chance:0.63, value:5853 },
-		// green: { chance:0.84, value:724 },
-		// cyan: { chance:0.49, value:1084 },
-		// pink: { chance:0.21, value:964 },
-	};
-
-	Array.from(document.querySelectorAll('#calc input[name="name"]'))
-		.map(elem => elem.parentElement)
-		.map(row => row.children)
-		.forEach(group => {
-			let group_data = {};
-			Array.from(group)
-				.filter(child => child.nodeName === "INPUT")
-				.forEach(input => {
-					// console.log(input.name);
-					switch (input.name) {
-						case "name":
-							group_name = input.value || '???';
-							break;
-						case "chance":
-							group_data[input.name] = validate.percent(input.value) ? transform.percent_number(input.value) : 0;
-							break;
-						case "value":
-						case "chance_cost":
-						case "value_cost":
-						case "value_increment":
-							group_data[input.name] = validate.suffix(input.value) ? transform.suffix_number(input.value) : 1;
-							break;
-						default:
-							// In case we throw anything else into an input
-							group_data[input.name] = input.value;
-					}
-				});
-			curr_types[group_name] = group_data;
-		});
+	let data = getData().data, curr_types = {};
+	Object.keys(data).forEach(key => {
+		let row = data[key];
+		row = {
+			chance: validate.percent(row.chance) ? transform.percent_number(row.chance) : 0
+			, value: validate.suffix(row.value) ? transform.suffix_number(row.value) : 1
+			, chance_cost: validate.suffix(row.chance_cost) ? transform.suffix_number(row.chance_cost) : 1
+			, value_cost: validate.suffix(row.value_cost) ? transform.suffix_number(row.value_cost) : 1
+			, value_increment: validate.suffix(row.value_increment) ? transform.suffix_number(row.value_increment) : 1
+		};
+		curr_types[key] = row;
+	});
 
 	let curr_expected = expected(curr_types);
 	$('#expected').html(`<strong>Expected value now: ${curr_expected.toFixed(2)}</strong><br/>`);
@@ -172,7 +242,7 @@ function calculate(target) {
 		}
 	});
 
-	console.log('curr_types:', curr_types)
+	// console.log('curr_types:', curr_types)
 
 	var best_upgrades = Object.keys(curr_types).map((k) => { return { type: k, upgrade: 'chance', value: curr_types[k].chance_upgrade, cost: curr_types[k].chance_cost }; })
 		.concat(Object.keys(curr_types).map((k) => { return { type: k, upgrade: 'value', value: curr_types[k].value_upgrade, cost: curr_types[k].value_cost }; }))
@@ -192,7 +262,7 @@ function calculate(target) {
 		}
 	});
 
-	console.log(best_upgrades)
+	// console.log(best_upgrades)
 
 	$('#upgrades').html(best_upgrades.map((row) => `<span><strong>+${row.value.toFixed(2)}</strong> for <strong>${transform.number_suffix(row.cost) || "?"}</strong> XP: increase <strong>${row.type} ${row.upgrade}</strong>${row.ratio ? ` ... a cost ratio of ${row.ratio}` : ''}</span>`).join('<br />'));
 

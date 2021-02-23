@@ -6,97 +6,20 @@
 		crossorigin="anonymous"></script>
 	<script src="calc.js"></script>
 	<style>
+		button { width: 8em; }
 		input { width: 5em; }
 		.warning { color: red; font-weight: bold; border: 1px solid red;}
 	</style>
 </head>
 <body>
-	<div id="calc">
-		<div class="row">
-			<label>Name</label>
-			<input name="name" value="orange" disabled />
-			<label>Chance:</label>
-			<input name="chance" value="100%" disabled />
-			<label>Chance upgrade cost</label>
-			<input name="chance_cost" value="0" disabled />
-			<label>Value:</label>
-			<input name="value" value="1" />
-			<label>Value upgrade cost</label>
-			<input name="value_cost" value="0" />
-			<label>Value upgrade increment</label>
-			<input name="value_increment" value="1" />
-		</div>
-		<div class="row">
-			<label>Name</label>
-			<input name="name" value="red" disabled />
-			<label>Chance:</label>
-			<input name="chance" value="0%" />
-			<label>Chance upgrade cost</label>
-			<input name="chance_cost" value="0" />
-			<label>Value:</label>
-			<input name="value" value="15" />
-			<label>Value upgrade cost</label>
-			<input name="value_cost" value="0" />
-			<label>Value upgrade increment</label>
-			<input name="value_increment" value="15" />
-		</div>
-		<div class="row">
-			<label>Name</label>
-			<input name="name" value="blue" disabled />
-			<label>Chance:</label>
-			<input name="chance" value="0%" />
-			<label>Chance upgrade cost</label>
-			<input name="chance_cost" value="0" />
-			<label>Value:</label>
-			<input name="value" value="30" />
-			<label>Value upgrade cost</label>
-			<input name="value_cost" value="0" />
-			<label>Value upgrade increment</label>
-			<input name="value_increment" value="30" />
-		</div>
-		<div class="row">
-			<label>Name</label>
-			<input name="name" value="green" disabled />
-			<label>Chance:</label>
-			<input name="chance" value="0%" />
-			<label>Chance upgrade cost</label>
-			<input name="chance_cost" value="0" />
-			<label>Value:</label>
-			<input name="value" value="60" />
-			<label>Value upgrade cost</label>
-			<input name="value_cost" value="0" />
-			<label>Value upgrade increment</label>
-			<input name="value_increment" value="60" />
-		</div>
-		<div class="row">
-			<label>Name</label>
-			<input name="name" value="cyan" disabled />
-			<label>Chance:</label>
-			<input name="chance" value="0%" />
-			<label>Chance upgrade cost</label>
-			<input name="chance_cost" value="0" />
-			<label>Value:</label>
-			<input name="value" value="120" />
-			<label>Value upgrade cost</label>
-			<input name="value_cost" value="0" />
-			<label>Value upgrade increment</label>
-			<input name="value_increment" value="120" />
-		</div>
-		<div class="row">
-			<label>Name</label>
-			<input name="name" value="pink" disabled />
-			<label>Chance:</label>
-			<input name="chance" value="0%" />
-			<label>Chance upgrade cost</label>
-			<input name="chance_cost" value="0" />
-			<label>Value:</label>
-			<input name="value" value="240" />
-			<label>Value upgrade cost</label>
-			<input name="value_cost" value="0" />
-			<label>Value upgrade increment</label>
-			<input name="value_increment" value="240" />
-		</div>
-	</div>
+	<button onclick="save();">Save Values</button>
+	<button onclick="load();">Load Values</button>
+	<br />
+	<button onclick="mode();">Switch Mode</button> 
+	<input id="mode" name="mode" value="xp" disabled />
+	<br />
+	<p id="status"></p>
+	<div id="calc"></div>
 	<p id="expected"/>
 	<p id="upgrades"/>
 </body>
