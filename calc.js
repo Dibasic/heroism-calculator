@@ -224,7 +224,7 @@ function calculate(target) {
 
 	Object.keys(curr_types).forEach(function(k) {
 		if (curr_types[k].chance < .909) { // <.91
-			let new_chance = curr_types[k].chance + .07;
+			let new_chance = curr_types[k].chance + ($('#mode').val() == "xp" ? .07 : .02);
 			let new_types = JSON.parse(JSON.stringify(curr_types)); // deep copy
 			new_types[k].chance = new_chance;
 			let new_expected = expected(new_types);
