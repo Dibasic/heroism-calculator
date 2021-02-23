@@ -80,7 +80,7 @@ function drawForm(data) {
 			<label>Value upgrade cost:</label>
 			<input name="value_cost" value="${data[key].value_cost || "0"}" />
 			<label>Value increment:</label>
-			<input name="value_increment" value="${data[key].value}" />
+			<input name="value_increment" value="${data[key].value_increment || data[key].value}" />
 		</div>`;
 	};
 	let html = '';
